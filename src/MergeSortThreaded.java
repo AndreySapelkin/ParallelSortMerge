@@ -7,8 +7,10 @@ public class MergeSortThreaded {
         Random rand = new Random();
         int[] original = new int[50_000_000];
         for (int i = 0; i < original.length; i++) {
-            original[i] = rand.nextInt(1000);
+            original[i] = rand.nextInt(10);
         }
+
+        //System.out.println("ИСХОДНЫЙ МАССИВ: " + Arrays.toString(original));
 
         System.out.println("ПРИМЕР 1: Сортировка масива в ОДИН ПОТОК");
         System.out.println("\n");
@@ -23,9 +25,12 @@ public class MergeSortThreaded {
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println("2-thread MergeSort takes: " + (float) elapsedTime / 1000 + " seconds");
-        System.out.println("Конец сортировки");
+        //System.out.println("Конец сортировки "  + Arrays.toString(runner1.getInternal()));
         System.out.println("\n");
 
+        System.out.println("ПРИМЕР 2: Сортировка масива в ДВА ПОТОКА");
+        System.out.println("\n");
+        System.out.println("Старт сортировки");
 
         startTime = System.currentTimeMillis();
         int[] subArr1 = new int[original.length / 2];
@@ -33,19 +38,66 @@ public class MergeSortThreaded {
         System.arraycopy(original, 0, subArr1, 0, original.length / 2);
         System.arraycopy(original, original.length / 2, subArr2, 0, original.length - original.length / 2);
 
+
         runner1 = new Worker(subArr1);
         Worker runner2 = new Worker(subArr2);
         runner1.start();
         runner2.start();
         runner1.join();
         runner2.join();
-        finalMerge(runner1.getInternal(), runner2.getInternal());
+        int[] result = finalMerge(runner1.getInternal(), runner2.getInternal());
         stopTime = System.currentTimeMillis();
         elapsedTime = stopTime - startTime;
         System.out.println("2-thread MergeSort takes: " + (float) elapsedTime / 1000 + " seconds");
+        //System.out.println("Конец сортировки " + Arrays.toString(result));
+        System.out.println("\n");
+
+
+        System.out.println("ПРИМЕР 3: Сортировка масива в ЧЕТЫРЕ ПОТОКА");
+        System.out.println("\n");
+        System.out.println("Старт сортировки");
+
+        startTime = System.currentTimeMillis();
+
+        int[] subArr1_1 = new int[original.length / 4];
+        int[] subArr1_2 = new int[original.length / 4];
+        int[] subArr2_1 = new int[original.length / 4];
+        int[] subArr2_2 = new int[original.length / 4];
+
+        System.arraycopy(subArr1, 0, subArr1_1, 0, subArr1.length / 2);
+        System.arraycopy(subArr1, subArr1.length / 2, subArr1_2, 0, subArr1.length - subArr1.length / 2);
+        System.arraycopy(subArr2, 0, subArr2_1, 0, subArr2.length / 2);
+        System.arraycopy(subArr2, subArr2.length / 2, subArr2_2, 0, subArr2.length - subArr2.length / 2);
+
+        runner1 = new Worker(subArr1_1);
+        runner2 = new Worker(subArr1_2);
+        Worker runner3 = new Worker(subArr2_1);
+        Worker runner4 = new Worker(subArr2_2);
+
+        runner1.start();
+        runner2.start();
+        runner3.start();
+        runner4.start();
+        runner1.join();
+        runner2.join();
+        runner3.join();
+        runner4.join();
+
+        int[] first = finalMerge(runner1.getInternal(), runner2.getInternal());
+        int[] second = finalMerge(runner3.getInternal(), runner4.getInternal());
+        int[] finalResult = finalMerge(first, second);
+
+
+        stopTime = System.currentTimeMillis();
+        elapsedTime = stopTime - startTime;
+        System.out.println("4-thread MergeSort takes: " + (float) elapsedTime / 1000 + " seconds");
+        //System.out.println("Конец сортировки " + Arrays.toString(finalResult));
+        System.out.println("\n");
+
+
     }
 
-    public static void finalMerge(int[] a, int[] b) {
+    public static int[] finalMerge(int[] a, int[] b) {
         int[] result = new int[a.length + b.length];
         int i = 0;
         int j = 0;
@@ -75,6 +127,7 @@ public class MergeSortThreaded {
                 }
             }
         }
+        return result;
     }
 
 }
