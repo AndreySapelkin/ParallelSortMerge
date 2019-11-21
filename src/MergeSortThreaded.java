@@ -5,7 +5,7 @@ public class MergeSortThreaded {
 
     public static void main(String[] args) throws InterruptedException {
         Random rand = new Random();
-        int[] original = new int[50_000_000];
+        int[] original = new int[80_000_000];
         for (int i = 0; i < original.length; i++) {
             original[i] = rand.nextInt(10);
         }
@@ -14,7 +14,7 @@ public class MergeSortThreaded {
 
         System.out.println("ПРИМЕР 1: Сортировка масива в ОДИН ПОТОК");
         System.out.println("\n");
-        System.out.println("Старт сортировки");
+        System.out.println("СТАРТ СОРТИРОВКИ");
         int[] test1Array = original.clone();
         long startTime = System.currentTimeMillis();
 
@@ -24,13 +24,13 @@ public class MergeSortThreaded {
 
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
-        System.out.println("2-thread MergeSort takes: " + (float) elapsedTime / 1000 + " seconds");
+        System.out.println("1-thread MergeSort takes: " + (float) elapsedTime / 1000 + " seconds");
         //System.out.println("Конец сортировки "  + Arrays.toString(runner1.getInternal()));
         System.out.println("\n");
 
         System.out.println("ПРИМЕР 2: Сортировка масива в ДВА ПОТОКА");
         System.out.println("\n");
-        System.out.println("Старт сортировки");
+        System.out.println("СТАРТ СОРТИРОВКИ");
 
         startTime = System.currentTimeMillis();
         int[] subArr1 = new int[original.length / 2];
@@ -55,7 +55,7 @@ public class MergeSortThreaded {
 
         System.out.println("ПРИМЕР 3: Сортировка масива в ЧЕТЫРЕ ПОТОКА");
         System.out.println("\n");
-        System.out.println("Старт сортировки");
+        System.out.println("СТАРТ СОРТИРОВКИ");
 
         startTime = System.currentTimeMillis();
 
@@ -94,6 +94,72 @@ public class MergeSortThreaded {
         //System.out.println("Конец сортировки " + Arrays.toString(finalResult));
         System.out.println("\n");
 
+        System.out.println("ПРИМЕР 4: Сортировка масива в ВОСЕМЬ ПОТОКОВ");
+        System.out.println("\n");
+        System.out.println("СТАРТ СОРТИРОВКИ");
+
+        startTime = System.currentTimeMillis();
+
+        int[] subArr1_1_1 = new int[original.length / 8];
+        int[] subArr1_1_2 = new int[original.length / 8];
+        int[] subArr1_2_1 = new int[original.length / 8];
+        int[] subArr1_2_2 = new int[original.length / 8];
+        int[] subArr2_1_1 = new int[original.length / 8];
+        int[] subArr2_1_2 = new int[original.length / 8];
+        int[] subArr2_2_1 = new int[original.length / 8];
+        int[] subArr2_2_2 = new int[original.length / 8];
+
+        System.arraycopy(subArr1_1, 0, subArr1_1_1, 0, subArr1_1.length / 2);
+        System.arraycopy(subArr1_1, subArr1_1.length / 2, subArr1_1_2, 0, subArr1_1.length - subArr1_1.length / 2);
+        System.arraycopy(subArr1_2, 0, subArr1_2_1, 0, subArr1_2.length / 2);
+        System.arraycopy(subArr1_2, subArr1_2_2.length / 2, subArr2_2, 0, subArr1_2.length - subArr1_2.length / 2);
+        System.arraycopy(subArr2_1, 0, subArr2_1_1, 0, subArr2_1.length / 2);
+        System.arraycopy(subArr2_1, subArr2_1.length / 2, subArr2_1_2, 0, subArr2_1.length - subArr2_1.length / 2);
+        System.arraycopy(subArr2_2, 0, subArr2_2_1, 0, subArr2_2.length / 2);
+        System.arraycopy(subArr2_2, subArr2_2.length / 2, subArr2_2_2, 0, subArr2_2.length - subArr2_2.length / 2);
+
+        runner1 = new Worker(subArr1_1_1);
+        runner2 = new Worker(subArr1_1_2);
+        runner3 = new Worker(subArr1_2_1);
+        runner4 = new Worker(subArr1_2_2);
+        Worker runner5 = new Worker(subArr2_1_1);
+        Worker runner6 = new Worker(subArr2_1_2);
+        Worker runner7 = new Worker(subArr2_2_1);
+        Worker runner8 = new Worker(subArr2_2_2);
+
+        runner1.start();
+        runner2.start();
+        runner3.start();
+        runner4.start();
+        runner5.start();
+        runner6.start();
+        runner7.start();
+        runner8.start();
+        runner1.join();
+        runner2.join();
+        runner3.join();
+        runner4.join();
+        runner5.join();
+        runner6.join();
+        runner7.join();
+        runner8.join();
+
+        int[] result1 = finalMerge(runner1.getInternal(), runner2.getInternal());
+        int[] result2 = finalMerge(runner3.getInternal(), runner4.getInternal());
+        int[] result3 = finalMerge(runner5.getInternal(), runner6.getInternal());
+        int[] result4 = finalMerge(runner7.getInternal(), runner8.getInternal());
+
+
+        int[] finalResult1 = finalMerge(result1, result2);
+        int[] finalResult2 = finalMerge(result3, result4);
+
+        int[] finalValue = finalMerge(finalResult1, finalResult2);
+
+        stopTime = System.currentTimeMillis();
+        elapsedTime = stopTime - startTime;
+        System.out.println("8-thread MergeSort takes: " + (float) elapsedTime / 1000 + " seconds");
+        //System.out.println("Конец сортировки " + Arrays.toString(finalResult));
+        System.out.println("\n");
 
     }
 
